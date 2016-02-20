@@ -1,0 +1,26 @@
+server-a:
+    build: .
+    volumes:
+        - ./server-a.conf:/redis.conf
+server-b:
+    build: .
+    volumes:
+        - ./server-b.conf:/redis.conf
+    links:
+        - server-a:server-a.local
+haproxy:
+    build: .
+    volumes:
+        - ./haproxy.conf:/haproxy.conf
+    links:
+        - server-a:server-a.local
+        - server-b:server-b.local
+    command: haproxy -f /haproxy.conf -V
+
+sentinel:
+    build: .
+    volumes:
+        - ./sentinel.conf:/sentinel.conf
+    links:
+        - server-a:server-a.local
+    command: redis-sentinel /sentinel.conf
